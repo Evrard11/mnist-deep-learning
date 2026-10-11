@@ -95,3 +95,25 @@ def show_mnist(X, y, predict=None, n=16):
             ax.set_title(f"{pred[i].item()} ({label})", fontsize=9, color="green" if ok else "red")
     plt.tight_layout()
     plt.show()
+
+
+def show_mnist_grid(X, y, predict=None, per_class=15):
+    """One row per digit with random examples (misclassified digits are shown in red)"""
+    labels = y.argmax(1)
+    fig, axes = plt.subplots(10, per_class, figsize=(per_class * 0.6, 10 * 0.6))
+    for c in range(10):
+        idx = torch.nonzero(labels == c).flatten()
+        idx = idx[torch.randperm(len(idx))[:per_class]]
+        pred = None
+        if predict is not None:
+            with torch.no_grad():
+                pred = predict(X[idx]).argmax(1)
+        for j, ax in enumerate(axes[c]):
+            ax.axis("off")
+            if pred is not None and pred[j] != c:
+                ax.imshow(X[idx[j]].reshape(28, 28), cmap="Reds")
+                ax.set_title(str(pred[j].item()), fontsize=7, color="red", pad=1)
+            else:
+                ax.imshow(X[idx[j]].reshape(28, 28), cmap="gray_r")
+    plt.tight_layout()
+    plt.show()
